@@ -17,6 +17,13 @@ class Item(Resource):
         #         return item
         # item = next(filter(lambda x: x['name'] == name, items), None)
         # return {'item': item}, 200 if item else 404
+        item = self.find_by_name(name)
+        if item:
+            return item
+        return {'message': 'Item not found'}, 404
+
+    @classmethod
+    def find_by_name(cls, name):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
@@ -27,17 +34,33 @@ class Item(Resource):
 
         if row:
             return {'item': {'name': row[0], 'price': row[1]}}
-        return {'message': 'Item not found'}, 404
 
     def post(self, name):
-        if next(filter(lambda x: x['name'] == name, items), None) is not None:
+        # if next(filter(lambda x: x['name'] == name, items), None) is not None:
+        if self.find_by_name(name):
             return {'message': "An item with name '{}' already exists.".format(name)}, 400
 
         data = Item.parser.parse_args()
         
         item = {'name': name, 'price': data['price']}
-        items.append(item)
+        
+        try:
+            Item.insert(item)
+        except:
+            return {"message": "An error occurred inserting the item."}
+
         return item, 201
+
+    @classmethod
+    def insert(self, item):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        query = "INSERT INTO items values(?, ?)"
+        cursor.execute(query, (item['name'], item['price']))
+
+        connection.commit()
+        connection.close()
 
     def delete(self, name):
         global items
