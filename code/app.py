@@ -17,4 +17,4 @@ api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/items')
 api.add_resource(UserRegister, '/register')
 
-app.run(port=5000, debug=True)
+app.run(port=5000, host="0.0.0.0", debug=True)

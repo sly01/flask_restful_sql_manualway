@@ -61,12 +61,21 @@ class Item(Resource):
 
         connection.commit()
         connection.close()
-
+    @jwt_required()
     def delete(self, name):
-        global items
-        items = list(filter(lambda x: x['name'] != name, items))
-        return {'message': 'Item deleted'}
+        if self.find_by_name(name):
+            connection = sqlite3.connect('data.db')
+            cursor = connection.cursor()
 
+            query = "DELETE FROM items WHERE name=?"
+            cursor.execute(query, (name,))
+
+            connection.commit()
+            connection.close()
+            return {'message': 'Item deleted'}
+        else:
+            return {'message': 'Item not found'}, 404
+        
     def put(self, name):
         data = Item.parser.parse_args()
         
