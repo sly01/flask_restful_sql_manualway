@@ -85,13 +85,12 @@ class Item(Resource):
                 Item.insert(updated_item)
                 
             except:
-                return {"message": "An error occurred inserting the item."}
+                return {"message": "An error occurred inserting the item."}, 500
         else:
             try:
                 Item.update(updated_item)
             except:
-                raise
-                return {"message": "An error occured updating the item."}
+                return {"message": "An error occured updating the item."}, 500
         return updated_item
     
     @classmethod
